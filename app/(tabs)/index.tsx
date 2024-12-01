@@ -1,39 +1,60 @@
-import { Image, StyleSheet, Platform, View } from "react-native";
-
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Appbar, Button, Icon, MD3Colors } from "react-native-paper";
-
+import { Image, StyleSheet, View, FlatList, useColorScheme } from "react-native";
+import {
+  Appbar,
+  Button,
+  IconButton,
+  MD3Colors,
+} from "react-native-paper";
+import React from "react";
+import { Colors } from "@/constants/Colors";
+const INIT_DATA = ["默认", "工作", "游戏"];
 export default function HomeScreen() {
-  const MORE_ICON = Platform.OS === "ios" ? "dots-horizontal" : "dots-vertical";
+  const colorScheme = useColorScheme();
+  const [data, setData] = React.useState(INIT_DATA);
+
+  const renderMenuItem = ({ item }: { item: string }) => {
+    return (
+      <Button textColor={Colors[colorScheme ?? 'light'].text} onPress={() => {}}>
+        {item}
+      </Button>
+    );
+  };
+
+  const renderMenuFooter = () => {
+    return (
+      <IconButton
+        icon="plus"
+        iconColor={Colors[colorScheme ?? 'light'].icon}
+        size={20}
+        onPress={() => console.log("Pressed")}
+      />
+    );
+  };
   return (
-    <View style={{ flex: 1 }}>
-      <Appbar.Header>
-        <Appbar.Content title="Home" />
-        <Appbar.Action icon="plus" onPress={() => {}} />
-        <Appbar.Action icon="magnify" onPress={() => {}} />
+    <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
+      <Appbar.Header style={{ backgroundColor: Colors[colorScheme ?? 'light'].navBackground }}>
+        <Appbar.Content title="Home" color={Colors[colorScheme ?? 'light'].navContent} />
+        <Appbar.Action
+          icon="plus"
+          iconColor={Colors[colorScheme ?? 'light'].navContent}
+          onPress={() => {}}
+        />
+        <Appbar.Action
+          icon="magnify"
+          iconColor={Colors[colorScheme ?? 'light'].navContent}
+          onPress={() => {}}
+        />
       </Appbar.Header>
+      <View style={{ flex: 1, flexDirection: "row" }}>
+        <FlatList
+          contentContainerStyle={{ alignItems: "center", width: 80 }}
+          data={data}
+          renderItem={renderMenuItem}
+          ListFooterComponent={renderMenuFooter}
+        />
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-});
+const styles = StyleSheet.create({});

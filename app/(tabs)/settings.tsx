@@ -1,18 +1,14 @@
-import { StyleSheet, Image, Platform, View } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { StyleSheet, useColorScheme, View } from "react-native";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Appbar } from "react-native-paper";
 
 export default function TabTwoScreen() {
+  const colorScheme = useColorScheme();
   return (
-    <View style={{ flex: 1 }}>
-      <Appbar.Header>
-        <Appbar.Content title="Settings" />
+    <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
+      <Appbar.Header style={{ backgroundColor: Colors[colorScheme ?? 'light'].navBackground }}>
+        <Appbar.Content title="Settings" color={Colors[colorScheme ?? 'light'].navContent}/>
       </Appbar.Header>
     </View>
   );
