@@ -16,6 +16,8 @@ import EditGroupDialog, {
 } from "@/components/EditGroupDialog";
 import * as asyncStorageUtil from "@/utils/asyncStorageUtil";
 import RenameGroupDialog, { RenameGroupDialogRefProps } from "@/components/RenameGroupDialog";
+import DeleteGroupDialog, { DeleteGroupDialogRefProps } from "@/components/DeleteGroupDialog";
+import { useRouter } from "expo-router";
 
 const INIT_DATA = ["默认", "工作", "游戏"];
 export default function HomeScreen() {
@@ -24,6 +26,8 @@ export default function HomeScreen() {
   const addGroupDialogRef = React.useRef<AddGroupDialogRefProps>(null);
   const editGroupDialogRef = React.useRef<EditGroupDialogRefProps>(null);
   const renameGroupDialogRef = React.useRef<RenameGroupDialogRefProps>(null);
+  const deleteGroupDialogRef = React.useRef<DeleteGroupDialogRefProps>(null);
+  const router = useRouter();
 
   const renderMenuItem = ({ item, index }: { item: string; index: number }) => {
     return (
@@ -87,6 +91,20 @@ export default function HomeScreen() {
     setMenu(newMenu);
   };
 
+  const handleDeleteGroup = (item: string, index: number) => {
+    deleteGroupDialogRef.current?.showDialog(item, index);
+  };
+
+  const deleteGroupItem = (index: number) => {
+    const newMenu = [...menu];
+    newMenu.splice(index, 1);
+    setMenu(newMenu);
+  };
+
+  const handleSortGroup = () => {
+    router.push("/home/GroupSort");
+  };
+
   return (
     <View
       style={{
@@ -123,8 +141,9 @@ export default function HomeScreen() {
         />
       </View>
       <AddGroupDialog ref={addGroupDialogRef} callback={addGroupItem} />
-      <EditGroupDialog ref={editGroupDialogRef} callback={editGroupItem} />
+      <EditGroupDialog ref={editGroupDialogRef} handleRenameCallback={editGroupItem} handleDeleteCallback={handleDeleteGroup} handleSortCallback={handleSortGroup} />
       <RenameGroupDialog ref={renameGroupDialogRef} callback={renameGroupItem} />
+      <DeleteGroupDialog ref={deleteGroupDialogRef} callback={deleteGroupItem} />
     </View>
   );
 }

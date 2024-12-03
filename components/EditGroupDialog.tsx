@@ -7,7 +7,9 @@ export type EditGroupDialogRefProps = {
 };
 
 export type Props = {
-  callback: (item: string, index: number) => void;
+  handleRenameCallback: (item: string, index: number) => void;
+  handleDeleteCallback: (item: string, index: number) => void;
+  handleSortCallback: () => void;
 };
 
 const EditGroupDialog = React.forwardRef((props: Props, ref) => {
@@ -15,10 +17,10 @@ const EditGroupDialog = React.forwardRef((props: Props, ref) => {
   const [item, setItem] = React.useState("");
   const [index, setIndex] = React.useState(0);
   const showDialog = (item: string, index: number) => {
-    setVisible(true)
+    setVisible(true);
     setItem(item);
     setIndex(index);
-};
+  };
   const hideDialog = () => setVisible(false);
 
   React.useImperativeHandle(ref, () => ({
@@ -28,25 +30,26 @@ const EditGroupDialog = React.forwardRef((props: Props, ref) => {
 
   const handleRename = () => {
     hideDialog();
-    props.callback?.(item, index);
+    props.handleRenameCallback?.(item, index);
   };
 
   const handleDelete = () => {
+    props.handleDeleteCallback?.(item, index);
     hideDialog();
   };
 
   const handleSort = () => {
+    props.handleSortCallback?.();
     hideDialog();
   };
-  
 
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
         <Dialog.Content>
-        <Button onPress={handleRename}>Rename Group</Button>
-        <Button onPress={handleDelete}>Delete Group</Button>
-        <Button onPress={handleSort}>Group Sort</Button>
+          <Button onPress={handleRename}>Rename Group</Button>
+          <Button onPress={handleDelete}>Delete Group</Button>
+          <Button onPress={handleSort}>Group Sort</Button>
         </Dialog.Content>
       </Dialog>
     </Portal>
