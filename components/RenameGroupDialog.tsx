@@ -1,24 +1,24 @@
 import * as React from "react";
 import { Button, Dialog, Portal, Text, TextInput } from "react-native-paper";
 
-export type EditGroupDialogRefProps = {
+export type RenameGroupDialogRefProps = {
   showDialog: (item: string, index: number) => {};
   hideDialog: () => {};
 };
 
 export type Props = {
-  callback: (item: string, index: number) => void;
+  callback: (text: string, index: number) => void;
 };
 
-const EditGroupDialog = React.forwardRef((props: Props, ref) => {
+const RenameGroupDialog = React.forwardRef((props: Props, ref) => {
   const [visible, setVisible] = React.useState(false);
-  const [item, setItem] = React.useState("");
+  const [text, setText] = React.useState("");
   const [index, setIndex] = React.useState(0);
   const showDialog = (item: string, index: number) => {
-    setVisible(true)
-    setItem(item);
+    setText(item);
     setIndex(index);
-};
+    setVisible(true);
+  };
   const hideDialog = () => setVisible(false);
 
   React.useImperativeHandle(ref, () => ({
@@ -26,31 +26,31 @@ const EditGroupDialog = React.forwardRef((props: Props, ref) => {
     hideDialog,
   }));
 
-  const handleRename = () => {
+  const handleCancel = () => {
     hideDialog();
-    props.callback?.(item, index);
+    setText("");
   };
 
-  const handleDelete = () => {
+  const handleOk = () => {
+    props.callback(text, index);
     hideDialog();
+    setText("");
   };
-
-  const handleSort = () => {
-    hideDialog();
-  };
-  
 
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
+        <Dialog.Title>Edit Group</Dialog.Title>
         <Dialog.Content>
-        <Button onPress={handleRename}>Rename Group</Button>
-        <Button onPress={handleDelete}>Delete Group</Button>
-        <Button onPress={handleSort}>Group Sort</Button>
+          <TextInput value={text} onChangeText={(text) => setText(text)} />
         </Dialog.Content>
+        <Dialog.Actions>
+          <Button onPress={handleCancel}>Cancel</Button>
+          <Button onPress={handleOk}>Ok</Button>
+        </Dialog.Actions>
       </Dialog>
     </Portal>
   );
 });
 
-export default EditGroupDialog;
+export default RenameGroupDialog;
