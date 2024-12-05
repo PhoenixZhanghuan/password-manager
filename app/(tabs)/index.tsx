@@ -102,7 +102,7 @@ export default function HomeScreen() {
   };
 
   const handleSortGroup = () => {
-    router.push("/home/GroupSort");
+    router.push({ pathname: "/home/GroupSort", params: { menu } });
   };
 
   return (

@@ -25,7 +25,7 @@ export default function GroupSortScreen() {
         styles.item,
         { backgroundColor: isActive ? "#ccc" : item.backgroundColor },
       ]}
-      activeOpacity={0.8}
+      activeOpacity={1.0}
       onLongPress={drag} // 在整个 View 上开启拖拽
     >
       <Text style={styles.text}>{item.label}</Text>
@@ -45,7 +45,7 @@ export default function GroupSortScreen() {
 const styles = StyleSheet.create({
   item: {
     padding: 20,
-    marginVertical: 10,
+    marginVertical: 4,
     marginHorizontal: 20,
     borderRadius: 5,
     alignItems: "center",
