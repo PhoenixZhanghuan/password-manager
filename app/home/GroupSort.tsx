@@ -10,8 +10,11 @@ import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist";
 import { router, useLocalSearchParams } from "expo-router";
-import { Appbar } from "react-native-paper";
+import { Appbar, IconButton } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
+import AbortSortGroupDialog, {
+  AbortSortGroupDialogRefProps,
+} from "@/components/AbortSortGroupDialog";
 
 export default function GroupSortScreen() {
   const colorScheme = useColorScheme();
@@ -19,21 +22,30 @@ export default function GroupSortScreen() {
 
   const [data, setData] = useState<string[]>(JSON.parse(params.menu as string));
 
+  const abortSortGroupDialogRef =
+    React.useRef<AbortSortGroupDialogRefProps>(null);
+
   const renderItem = ({ item, drag, isActive }: RenderItemParams<string>) => (
     // 将拖拽绑定到整个 View
-    <TouchableOpacity
-      style={[styles.item, { backgroundColor: isActive ? "#ccc" : "#ff6666" }]}
-      activeOpacity={1.0}
-      onLongPress={drag} // 在整个 View 上开启拖拽
-    >
+    <View style={[styles.item]}>
       <Text style={styles.text}>{item}</Text>
-    </TouchableOpacity>
+      <IconButton
+        style={{backgroundColor: isActive ?"#ccc" : "#fff"}}
+        icon="menu"
+        iconColor={Colors[colorScheme ?? "light"].icon}
+        size={20}
+        onPress={() => {}}
+        onLongPress={drag} // 在整个 View 上开启拖拽
+      />
+    </View>
   );
 
   const handleBack = () => {
     if (JSON.stringify(data) === params.menu) {
       router.back();
       return;
+    } else {
+      abortSortGroupDialogRef.current?.showDialog();
     }
   };
 
@@ -42,6 +54,10 @@ export default function GroupSortScreen() {
       pathname: "/(tabs)",
       params: { menu: JSON.stringify(data) },
     });
+  };
+
+  const handleAbortSort = () => {
+    router.back();
   };
 
   return (
@@ -71,22 +87,27 @@ export default function GroupSortScreen() {
         keyExtractor={(item, index) => item + index}
         onDragEnd={({ data }) => setData(data)} // 更新排序后的数据
       />
+      <AbortSortGroupDialog
+        ref={abortSortGroupDialogRef}
+        callback={handleAbortSort}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
   item: {
-    padding: 20,
-    marginVertical: 4,
-    marginHorizontal: 20,
+    padding: 10,
     borderRadius: 5,
     alignItems: "center",
-    justifyContent: "center",
-    elevation: 3, // 添加阴影效果
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ccc",
+    flexDirection: "row",
   },
   text: {
-    fontSize: 18,
-    color: "#fff",
+    fontSize: 16,
+    color: Colors.light.text,
   },
 });
