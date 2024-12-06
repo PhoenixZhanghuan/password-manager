@@ -47,9 +47,9 @@ const EditGroupDialog = React.forwardRef((props: Props, ref) => {
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
         <Dialog.Content>
-          <Button onPress={handleRename}>Rename Group</Button>
-          <Button onPress={handleDelete}>Delete Group</Button>
-          <Button onPress={handleSort}>Group Sort</Button>
+          <Button onPress={handleRename}>重命名组</Button>
+          <Button onPress={handleDelete}>删除组</Button>
+          <Button onPress={handleSort}>组排序</Button>
         </Dialog.Content>
       </Dialog>
     </Portal>

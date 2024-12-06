@@ -38,16 +38,15 @@ const DeleteGroupDialog = React.forwardRef((props: Props, ref) => {
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
-        <Dialog.Title>Delete Group {item}</Dialog.Title>
+        <Dialog.Title>删除组 {item}</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">
-            Delete the group and all account data under the group. After
-            deletion, it will not be recovered, are you sure?
+            删除组及其下的所有账户数据。删除后无法恢复，确定要删除吗？{" "}
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={handleCancel}>Cancel</Button>
-          <Button onPress={handleOk}>Ok</Button>
+          <Button onPress={handleCancel}>取消</Button>
+          <Button onPress={handleOk}>确定</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

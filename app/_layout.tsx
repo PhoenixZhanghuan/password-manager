@@ -10,7 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { PaperProvider } from "react-native-paper";
-import 'react-native-gesture-handler';
+import "react-native-gesture-handler";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -37,13 +37,17 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <PaperProvider>
-      <GestureHandlerRootView style={styles.container}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </GestureHandlerRootView>
+        <GestureHandlerRootView style={styles.container}>
+          <Stack
+            screenOptions={{
+              headerShown: false, // 确保全局禁用 header
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </GestureHandlerRootView>
       </PaperProvider>
     </ThemeProvider>
   );
@@ -51,6 +55,6 @@ export default function RootLayout() {
 
 const styles = {
   container: {
-    flex: 1
+    flex: 1,
   },
 };

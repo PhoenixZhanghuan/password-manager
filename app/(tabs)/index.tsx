@@ -17,10 +17,11 @@ import EditGroupDialog, {
 import * as asyncStorageUtil from "@/utils/asyncStorageUtil";
 import RenameGroupDialog, { RenameGroupDialogRefProps } from "@/components/RenameGroupDialog";
 import DeleteGroupDialog, { DeleteGroupDialogRefProps } from "@/components/DeleteGroupDialog";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 const INIT_DATA = ["默认", "工作", "游戏"];
 export default function HomeScreen() {
+  const { menu: adjustedMenu } = useLocalSearchParams();
   const colorScheme = useColorScheme();
   const [menu, setMenu] = React.useState(INIT_DATA);
   const addGroupDialogRef = React.useRef<AddGroupDialogRefProps>(null);
@@ -66,9 +67,15 @@ export default function HomeScreen() {
     initData();
   }, []);
 
+  useEffect(() => {
+    if (adjustedMenu) {
+      setMenu(JSON.parse(adjustedMenu as string));
+    }
+  }, [adjustedMenu]);
+
   const initData = async () => {
     const data = await asyncStorageUtil.getItemStorage("menu");
-    if (data) {
+    if (data && !adjustedMenu) {
       setMenu(JSON.parse(data));
     }
   };
@@ -102,7 +109,7 @@ export default function HomeScreen() {
   };
 
   const handleSortGroup = () => {
-    router.push({ pathname: "/home/GroupSort", params: { menu } });
+    router.navigate({ pathname: "/home/GroupSort", params: { menu: JSON.stringify(menu) } });
   };
 
   return (
@@ -118,7 +125,7 @@ export default function HomeScreen() {
         }}
       >
         <Appbar.Content
-          title="Home"
+          title="主页"
           color={Colors[colorScheme ?? "light"].navContent}
         />
         <Appbar.Action

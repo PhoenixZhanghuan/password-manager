@@ -40,13 +40,13 @@ const RenameGroupDialog = React.forwardRef((props: Props, ref) => {
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
-        <Dialog.Title>Edit Group</Dialog.Title>
+        <Dialog.Title>重命名组</Dialog.Title>
         <Dialog.Content>
           <TextInput value={text} onChangeText={(text) => setText(text)} />
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={handleCancel}>Cancel</Button>
-          <Button onPress={handleOk}>Ok</Button>
+          <Button onPress={handleCancel}>取消</Button>
+          <Button onPress={handleOk}>确定</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

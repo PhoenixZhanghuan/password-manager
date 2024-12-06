@@ -36,7 +36,7 @@ const AddGroupDialog = React.forwardRef((props: Props, ref) => {
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
-        <Dialog.Title>Add Group</Dialog.Title>
+        <Dialog.Title>添加组</Dialog.Title>
         <Dialog.Content>
           <TextInput
             value={text}
@@ -44,8 +44,8 @@ const AddGroupDialog = React.forwardRef((props: Props, ref) => {
           />
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={handleCancel}>Cancel</Button>
-          <Button onPress={handleOk}>Ok</Button>
+          <Button onPress={handleCancel}>取消</Button>
+          <Button onPress={handleOk}>确定</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

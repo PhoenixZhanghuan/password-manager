@@ -6,9 +6,9 @@ import { Appbar } from "react-native-paper";
 export default function TabTwoScreen() {
   const colorScheme = useColorScheme();
   return (
-    <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
-      <Appbar.Header style={{ backgroundColor: Colors[colorScheme ?? 'light'].navBackground }}>
-        <Appbar.Content title="Settings" color={Colors[colorScheme ?? 'light'].navContent}/>
+    <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? "light"].background }}>
+      <Appbar.Header style={{ backgroundColor: Colors[colorScheme ?? "light"].navBackground }}>
+        <Appbar.Content title="设置" color={Colors[colorScheme ?? "light"].navContent} />
       </Appbar.Header>
     </View>
   );
