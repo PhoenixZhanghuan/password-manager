@@ -15,14 +15,22 @@ import EditGroupDialog, {
   type EditGroupDialogRefProps,
 } from "@/components/EditGroupDialog";
 import * as asyncStorageUtil from "@/utils/asyncStorageUtil";
-import RenameGroupDialog, { RenameGroupDialogRefProps } from "@/components/RenameGroupDialog";
-import DeleteGroupDialog, { DeleteGroupDialogRefProps } from "@/components/DeleteGroupDialog";
+import RenameGroupDialog, {
+  RenameGroupDialogRefProps,
+} from "@/components/RenameGroupDialog";
+import DeleteGroupDialog, {
+  DeleteGroupDialogRefProps,
+} from "@/components/DeleteGroupDialog";
 import { useLocalSearchParams, useRouter } from "expo-router";
+
+// 定义样式类型
+type StyleParams = "light" | "dark";
 
 const INIT_DATA = ["默认", "工作", "游戏"];
 export default function HomeScreen() {
   const { menu: adjustedMenu } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() as StyleParams;
+  const styles = createStyles(colorScheme);
   const [menu, setMenu] = React.useState(INIT_DATA);
   const addGroupDialogRef = React.useRef<AddGroupDialogRefProps>(null);
   const editGroupDialogRef = React.useRef<EditGroupDialogRefProps>(null);
@@ -37,6 +45,7 @@ export default function HomeScreen() {
           textColor={Colors[colorScheme ?? "light"].text}
           onPress={() => {}}
           onLongPress={() => handleEditMenuItem(item, index)}
+          style={styles.groupBtn}
         >
           {item}
         </Button>
@@ -109,7 +118,10 @@ export default function HomeScreen() {
   };
 
   const handleSortGroup = () => {
-    router.navigate({ pathname: "/home/GroupSort", params: { menu: JSON.stringify(menu) } });
+    router.navigate({
+      pathname: "/home/GroupSort",
+      params: { menu: JSON.stringify(menu) },
+    });
   };
 
   return (
@@ -140,19 +152,46 @@ export default function HomeScreen() {
         />
       </Appbar.Header>
       <View style={{ flex: 1, flexDirection: "row" }}>
+        <View style={{    
+            height: "100%",        
+            borderRightWidth: StyleSheet.hairlineWidth,
+            borderRightColor: Colors[colorScheme ?? "light"].borderColor,}} >
         <FlatList
-          contentContainerStyle={{ alignItems: "center", width: 90 }}
+          
+          contentContainerStyle={{
+            alignItems: "center",
+            width: 80,
+          }}
           data={menu}
           renderItem={renderMenuItem}
           ListFooterComponent={renderMenuFooter}
         />
+        </View>
+
       </View>
       <AddGroupDialog ref={addGroupDialogRef} callback={addGroupItem} />
-      <EditGroupDialog ref={editGroupDialogRef} handleRenameCallback={editGroupItem} handleDeleteCallback={handleDeleteGroup} handleSortCallback={handleSortGroup} />
-      <RenameGroupDialog ref={renameGroupDialogRef} callback={renameGroupItem} />
-      <DeleteGroupDialog ref={deleteGroupDialogRef} callback={deleteGroupItem} />
+      <EditGroupDialog
+        ref={editGroupDialogRef}
+        handleRenameCallback={editGroupItem}
+        handleDeleteCallback={handleDeleteGroup}
+        handleSortCallback={handleSortGroup}
+      />
+      <RenameGroupDialog
+        ref={renameGroupDialogRef}
+        callback={renameGroupItem}
+      />
+      <DeleteGroupDialog
+        ref={deleteGroupDialogRef}
+        callback={deleteGroupItem}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const createStyles = (colorScheme: StyleParams) =>
+  StyleSheet.create({
+    groupBtn: {
+      borderBottomColor: Colors[colorScheme ?? "light"].borderColor,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+  });
