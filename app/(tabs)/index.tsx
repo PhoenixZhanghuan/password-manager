@@ -14,7 +14,6 @@ import AddGroupDialog, {
 import EditGroupDialog, {
   type EditGroupDialogRefProps,
 } from "@/components/EditGroupDialog";
-import * as asyncStorageUtil from "@/utils/asyncStorageUtil";
 import RenameGroupDialog, {
   RenameGroupDialogRefProps,
 } from "@/components/RenameGroupDialog";
@@ -22,32 +21,32 @@ import DeleteGroupDialog, {
   DeleteGroupDialogRefProps,
 } from "@/components/DeleteGroupDialog";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { initializeDatabase, addGroup, deleteGroup, updateGroup, getAllGroups } from "@/utils/sqlite";
 
 // 定义样式类型
 type StyleParams = "light" | "dark";
 
-const INIT_DATA = ["默认", "工作", "游戏"];
 export default function HomeScreen() {
   const { menu: adjustedMenu } = useLocalSearchParams();
   const colorScheme = useColorScheme() as StyleParams;
   const styles = createStyles(colorScheme);
-  const [menu, setMenu] = React.useState(INIT_DATA);
+  const [menu, setMenu] = React.useState<{ id: number; name: string }[]>([]);
   const addGroupDialogRef = React.useRef<AddGroupDialogRefProps>(null);
   const editGroupDialogRef = React.useRef<EditGroupDialogRefProps>(null);
   const renameGroupDialogRef = React.useRef<RenameGroupDialogRefProps>(null);
   const deleteGroupDialogRef = React.useRef<DeleteGroupDialogRefProps>(null);
   const router = useRouter();
 
-  const renderMenuItem = ({ item, index }: { item: string; index: number }) => {
+  const renderMenuItem = ({ item, index }: { item: { id: number; name: string }; index: number }) => {
     return (
       <View style={{ alignItems: "center", height: 40 }}>
         <Button
           textColor={Colors[colorScheme ?? "light"].text}
           onPress={() => {}}
-          onLongPress={() => handleEditMenuItem(item, index)}
+          onLongPress={() => handleEditMenuItem(item.name, index)}
           style={styles.groupBtn}
         >
-          {item}
+          {item.name}
         </Button>
       </View>
     );
@@ -68,8 +67,9 @@ export default function HomeScreen() {
     addGroupDialogRef.current?.showDialog();
   };
 
-  const addGroupItem = (group: string) => {
-    setMenu((prev) => [...prev, group]);
+  const addGroupItem = async (group: string) => {
+    let newGroupId = await addGroup(group); // Insert into database
+    setMenu((prev) => [...prev, { id: newGroupId, name: group }]); // Update local state with ID
   };
 
   useEffect(() => {
@@ -78,20 +78,24 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (adjustedMenu) {
-      setMenu(JSON.parse(adjustedMenu as string));
+      let newAdjustedMenu = JSON.parse(adjustedMenu as string);
+      setMenu(newAdjustedMenu);
+      Promise.all(newAdjustedMenu.map((item: { id: number; name: string }, index: number) => {
+        return updateGroup(item.id, item.name, index); // Update the sort_order based on the index
+      }));
     }
   }, [adjustedMenu]);
 
   const initData = async () => {
-    const data = await asyncStorageUtil.getItemStorage("menu");
-    if (data && !adjustedMenu) {
-      setMenu(JSON.parse(data));
+    console.log("initData>>>");
+    await initializeDatabase();
+    console.log("initData>>>2");
+    const data = await getAllGroups();
+    console.log("data>>>", data);
+    if (data.length > 0) {
+      setMenu(data.map((group: any) => ({ id: group.id, name: group.name }))); // Store both id and name
     }
   };
-
-  useEffect(() => {
-    asyncStorageUtil.setItemStorage("menu", JSON.stringify(menu));
-  }, [menu]);
 
   const handleEditMenuItem = (item: string, index: number) => {
     editGroupDialogRef.current?.showDialog(item, index);
@@ -101,9 +105,11 @@ export default function HomeScreen() {
     renameGroupDialogRef.current?.showDialog(item, index);
   };
 
-  const renameGroupItem = (text: string, index: number) => {
+  const renameGroupItem = async (text: string, index: number) => {
+    const groupId = menu[index].id; // Get the ID from the menu
+    await updateGroup(groupId, text, index); // Update in database
     const newMenu = [...menu];
-    newMenu[index] = text;
+    newMenu[index].name = text; // Update the name in local state
     setMenu(newMenu);
   };
 
@@ -111,7 +117,9 @@ export default function HomeScreen() {
     deleteGroupDialogRef.current?.showDialog(item, index);
   };
 
-  const deleteGroupItem = (index: number) => {
+  const deleteGroupItem = async (index: number) => {
+    const groupId = menu[index].id; // Get the ID from the menu
+    await deleteGroup(groupId); // Delete from database
     const newMenu = [...menu];
     newMenu.splice(index, 1);
     setMenu(newMenu);

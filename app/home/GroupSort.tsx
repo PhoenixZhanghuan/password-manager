@@ -20,15 +20,15 @@ export default function GroupSortScreen() {
   const colorScheme = useColorScheme();
   const params = useLocalSearchParams();
 
-  const [data, setData] = useState<string[]>(JSON.parse(params.menu as string));
+  const [data, setData] = useState<{ id: number; name: string }[]>(JSON.parse(params.menu as string));
 
   const abortSortGroupDialogRef =
     React.useRef<AbortSortGroupDialogRefProps>(null);
 
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<string>) => (
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<{ id: number; name: string }>) => (
     // 将拖拽绑定到整个 View
     <View style={[styles.item]}>
-      <Text style={styles.text}>{item}</Text>
+      <Text style={styles.text}>{item.name}</Text>
       <IconButton
         style={{backgroundColor: isActive ?"#ccc" : "#fff"}}
         icon="menu"
@@ -84,7 +84,7 @@ export default function GroupSortScreen() {
       <DraggableFlatList
         data={data}
         renderItem={renderItem}
-        keyExtractor={(item, index) => item + index}
+        keyExtractor={(item, index) => item.id + "_" + index}
         onDragEnd={({ data }) => setData(data)} // 更新排序后的数据
       />
       <AbortSortGroupDialog
