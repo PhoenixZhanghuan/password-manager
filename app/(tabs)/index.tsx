@@ -87,11 +87,8 @@ export default function HomeScreen() {
   }, [adjustedMenu]);
 
   const initData = async () => {
-    console.log("initData>>>");
     await initializeDatabase();
-    console.log("initData>>>2");
     const data = await getAllGroups();
-    console.log("data>>>", data);
     if (data.length > 0) {
       setMenu(data.map((group: any) => ({ id: group.id, name: group.name }))); // Store both id and name
     }
