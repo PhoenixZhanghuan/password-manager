@@ -4,9 +4,10 @@ import {
   View,
   FlatList,
   useColorScheme,
+  TouchableOpacity,
 } from "react-native";
 import { Appbar, Button, IconButton } from "react-native-paper";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import AddGroupDialog, {
   type AddGroupDialogRefProps,
@@ -21,28 +22,53 @@ import DeleteGroupDialog, {
   DeleteGroupDialogRefProps,
 } from "@/components/DeleteGroupDialog";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { initializeDatabase, addGroup, deleteGroup, updateGroup, getAllGroups } from "@/utils/sqlite";
+import {
+  initializeDatabase,
+  addGroup,
+  deleteGroup,
+  updateGroup,
+  getAllGroups,
+} from "@/utils/sqlite";
 
 // 定义样式类型
 type StyleParams = "light" | "dark";
+
+type MenuType = { id: number; name: string };
 
 export default function HomeScreen() {
   const { menu: adjustedMenu } = useLocalSearchParams();
   const colorScheme = useColorScheme() as StyleParams;
   const styles = createStyles(colorScheme);
-  const [menu, setMenu] = React.useState<{ id: number; name: string }[]>([]);
+  const [menu, setMenu] = React.useState<MenuType[]>([]);
   const addGroupDialogRef = React.useRef<AddGroupDialogRefProps>(null);
   const editGroupDialogRef = React.useRef<EditGroupDialogRefProps>(null);
   const renameGroupDialogRef = React.useRef<RenameGroupDialogRefProps>(null);
   const deleteGroupDialogRef = React.useRef<DeleteGroupDialogRefProps>(null);
   const router = useRouter();
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(0);
 
-  const renderMenuItem = ({ item, index }: { item: { id: number; name: string }; index: number }) => {
+  const renderMenuItem = ({
+    item,
+    index,
+  }: {
+    item: MenuType;
+    index: number;
+  }) => {
+    const isSelected = selectedItemId === item.id; // Assuming each item has a unique id
     return (
-      <View style={{ alignItems: "center", height: 40 }}>
+      <View
+        style={{
+          alignItems: "center",
+          height: 40,
+        }}
+      >
         <Button
-          textColor={Colors[colorScheme ?? "light"].text}
-          onPress={() => {}}
+          textColor={
+            isSelected
+              ? Colors[colorScheme ?? "light"].selectedText
+              : Colors[colorScheme ?? "light"].text
+          }
+          onPress={() => setSelectedItemId(item.id)}
           onLongPress={() => handleEditMenuItem(item.name, index)}
           style={styles.groupBtn}
         >
@@ -80,18 +106,23 @@ export default function HomeScreen() {
     if (adjustedMenu) {
       let newAdjustedMenu = JSON.parse(adjustedMenu as string);
       setMenu(newAdjustedMenu);
-      Promise.all(newAdjustedMenu.map((item: { id: number; name: string }, index: number) => {
-        return updateGroup(item.id, item.name, index); // Update the sort_order based on the index
-      }));
+      Promise.all(
+        newAdjustedMenu.map(
+          (item: MenuType, index: number) => {
+            return updateGroup(item.id, item.name, index); // Update the sort_order based on the index
+          }
+        )
+      );
     }
   }, [adjustedMenu]);
 
   const initData = async () => {
     await initializeDatabase();
-    const data = await getAllGroups();
+    const data = (await getAllGroups()) as MenuType[];
     if (data.length > 0) {
-      setMenu(data.map((group: any) => ({ id: group.id, name: group.name }))); // Store both id and name
+      setMenu(data.map((group: MenuType) => ({ id: group.id, name: group.name }))); // Store both id and name
     }
+    setSelectedItemId(data?.[0]?.id);
   };
 
   const handleEditMenuItem = (item: string, index: number) => {
@@ -129,6 +160,13 @@ export default function HomeScreen() {
     });
   };
 
+  const AddAccount = () => {
+    router.navigate({
+      pathname: "/home/AddAccount",
+      params: { menu: JSON.stringify(menu) },
+    });
+  };
+
   return (
     <View
       style={{
@@ -148,7 +186,7 @@ export default function HomeScreen() {
         <Appbar.Action
           icon="plus"
           iconColor={Colors[colorScheme ?? "light"].navContent}
-          onPress={() => {}}
+          onPress={AddAccount}
         />
         <Appbar.Action
           icon="magnify"
@@ -157,22 +195,23 @@ export default function HomeScreen() {
         />
       </Appbar.Header>
       <View style={{ flex: 1, flexDirection: "row" }}>
-        <View style={{    
-            height: "100%",        
+        <View
+          style={{
+            height: "100%",
             borderRightWidth: StyleSheet.hairlineWidth,
-            borderRightColor: Colors[colorScheme ?? "light"].borderColor,}} >
-        <FlatList
-          
-          contentContainerStyle={{
-            alignItems: "center",
-            width: 80,
+            borderRightColor: Colors[colorScheme ?? "light"].borderColor,
           }}
-          data={menu}
-          renderItem={renderMenuItem}
-          ListFooterComponent={renderMenuFooter}
-        />
+        >
+          <FlatList
+            contentContainerStyle={{
+              alignItems: "center",
+              width: 80,
+            }}
+            data={menu}
+            renderItem={renderMenuItem}
+            ListFooterComponent={renderMenuFooter}
+          />
         </View>
-
       </View>
       <AddGroupDialog ref={addGroupDialogRef} callback={addGroupItem} />
       <EditGroupDialog

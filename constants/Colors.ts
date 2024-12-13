@@ -9,6 +9,7 @@ const primaryDark = '#fff';
 export const Colors = {
   light: {
     text: '#11181C',
+    selectedText: 'rgba(127, 103, 190, 1)',
     background: '#fff',
     navBackground: primary,
     navContent: '#fff',
@@ -20,6 +21,7 @@ export const Colors = {
   },
   dark: {
     text: '#ECEDEE',
+    selectedText: 'rgba(127, 103, 190, 1)',
     background: '#151718',
     navBackground: primary,
     navContent: '#fff',
