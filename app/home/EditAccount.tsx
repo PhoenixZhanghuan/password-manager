@@ -50,7 +50,7 @@ export default function EditAccountScreen() {
     );
     router.navigate({
       pathname: "/(tabs)",
-      params: { menuItemId: params.menuItemId },
+      params: { menuItemId: groupId },
     });
 
     setAccountName("");
