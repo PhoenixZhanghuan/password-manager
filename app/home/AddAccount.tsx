@@ -27,16 +27,6 @@ export default function GroupSortScreen() {
       alert("请填写完整信息");
       return;
     }
-    console.log(
-      "accountName>>>",
-      accountName,
-      "accountNumber>>>",
-      accountNumber,
-      "accountPassword>>>",
-      accountPassword,
-      "menuItemId>>>",
-      params.menuItemId
-    );
     await addAccount(
       accountName,
       accountNumber,
