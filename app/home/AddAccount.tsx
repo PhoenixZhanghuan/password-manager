@@ -1,10 +1,6 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  useColorScheme,
-} from "react-native";
-import { TextInput } from "react-native-paper";
+import { StyleSheet, View, useColorScheme } from "react-native";
+import { Button, Dialog, Portal, TextInput, Text } from "react-native-paper";
 import { router, useLocalSearchParams } from "expo-router";
 import { Appbar } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
@@ -18,13 +14,15 @@ export default function GroupSortScreen() {
   const [accountNumber, setAccountNumber] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
 
+  const [visible, setVisible] = useState(false);
+
   const handleBack = () => {
     router.back();
   };
 
   const handleConfirm = async () => {
     if (accountName === "" || accountNumber === "" || accountPassword === "") {
-      alert("请填写完整信息");
+      setVisible(true);
       return;
     }
     await addAccount(
@@ -102,6 +100,17 @@ export default function GroupSortScreen() {
           }
         />
       </View>
+      <Portal>
+        <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+          <Dialog.Title>警告</Dialog.Title>
+          <Dialog.Content>
+            <Text>请填写完整信息</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setVisible(false)}>关闭</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 }
