@@ -198,7 +198,7 @@ export default function HomeScreen() {
     });
   };
 
-  const AddAccount = () => {
+  const toAddAccount = () => {
     router.navigate({
       pathname: "/home/AddAccount",
       params: { menuItemId: selectedItemId },
@@ -209,8 +209,11 @@ export default function HomeScreen() {
    
   };
 
-  const handleEditAccount = () => {
-    
+  const handleEditAccount = (item: Account) => {
+    router.navigate({
+      pathname: "/home/EditAccount",
+      params: { account: JSON.stringify(item) },
+    });
   };
 
   const handleCopyAccount = () => {
@@ -266,7 +269,7 @@ export default function HomeScreen() {
         <Appbar.Action
           icon="plus"
           iconColor={Colors[colorScheme ?? "light"].navContent}
-          onPress={AddAccount}
+          onPress={toAddAccount}
         />
         <Appbar.Action
           icon="magnify"

@@ -4,17 +4,31 @@ import { Button, Dialog, Portal, TextInput, Text } from "react-native-paper";
 import { router, useLocalSearchParams } from "expo-router";
 import { Appbar } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
-import { addAccount } from "@/utils/sqlite";
+import { updateAccount } from "@/utils/sqlite";
 
-export default function AddAccountScreen() {
+export default function EditAccountScreen() {
   const colorScheme = useColorScheme();
   const params = useLocalSearchParams();
 
   const [accountName, setAccountName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
+  const [accountId, setAccountId] = useState(0);
+  const [groupId, setGroupId] = useState(0);
 
   const [visible, setVisible] = useState(false);
+
+  React.useEffect(() => {
+    if (!params.account) {
+      return;
+    }
+    let account = JSON.parse(params.account as string);
+    setAccountName(account.name);
+    setAccountNumber(account.username);
+    setAccountPassword(account.password);
+    setAccountId(account.id);
+    setGroupId(account.group_id);
+  }, [params.account]);
 
   const handleBack = () => {
     router.back();
@@ -25,11 +39,14 @@ export default function AddAccountScreen() {
       setVisible(true);
       return;
     }
-    await addAccount(
-      accountName,
-      accountNumber,
-      accountPassword,
-      parseInt(params.menuItemId as string)
+    await updateAccount(
+      {
+        id: accountId,
+        name: accountName,
+        username: accountNumber,
+        password: accountPassword,
+        group_id: groupId,
+      },
     );
     router.navigate({
       pathname: "/(tabs)",
@@ -53,7 +70,7 @@ export default function AddAccountScreen() {
           color={Colors[colorScheme ?? "light"].navContent}
         />
         <Appbar.Content
-          title="添加账户"
+          title="编辑账户"
           color={Colors[colorScheme ?? "light"].navContent}
         />
         <Appbar.Action
