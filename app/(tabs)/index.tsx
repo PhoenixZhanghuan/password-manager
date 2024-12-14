@@ -4,7 +4,7 @@ import {
   View,
   FlatList,
   useColorScheme,
-  TouchableOpacity,
+  Text,
 } from "react-native";
 import { Appbar, Button, IconButton } from "react-native-paper";
 import React, { useEffect, useState } from "react";
@@ -28,6 +28,7 @@ import {
   deleteGroup,
   updateGroup,
   getAllGroups,
+  getAllAccount,
 } from "@/utils/sqlite";
 
 // 定义样式类型
@@ -35,8 +36,16 @@ type StyleParams = "light" | "dark";
 
 type MenuType = { id: number; name: string };
 
+type Account = {
+  id: number;
+  name: string;
+  username: string;
+  password: string;
+  group_id: number;
+};
+
 export default function HomeScreen() {
-  const { menu: adjustedMenu } = useLocalSearchParams();
+  const { menu: adjustedMenu, menuItemId } = useLocalSearchParams();
   const colorScheme = useColorScheme() as StyleParams;
   const styles = createStyles(colorScheme);
   const [menu, setMenu] = React.useState<MenuType[]>([]);
@@ -46,6 +55,7 @@ export default function HomeScreen() {
   const deleteGroupDialogRef = React.useRef<DeleteGroupDialogRefProps>(null);
   const router = useRouter();
   const [selectedItemId, setSelectedItemId] = useState<number | null>(0);
+  const [accounts, setAccounts] = useState<Account[] | null>([]);
 
   const renderMenuItem = ({
     item,
@@ -68,7 +78,7 @@ export default function HomeScreen() {
               ? Colors[colorScheme ?? "light"].selectedText
               : Colors[colorScheme ?? "light"].text
           }
-          onPress={() => setSelectedItemId(item.id)}
+          onPress={() => handleClickMenuItem(item, index)}
           onLongPress={() => handleEditMenuItem(item.name, index)}
           style={styles.groupBtn}
         >
@@ -89,6 +99,13 @@ export default function HomeScreen() {
     );
   };
 
+  const handleClickMenuItem = (item: MenuType, index: number) => {
+    setSelectedItemId(item.id);
+    getAllAccount(item.id).then((accounts) => {
+      setAccounts(accounts);
+    });
+  };
+
   const addMenuItem = () => {
     addGroupDialogRef.current?.showDialog();
   };
@@ -102,28 +119,42 @@ export default function HomeScreen() {
     initData();
   }, []);
 
+  const initData = async () => {
+    await initializeDatabase();
+    const data = (await getAllGroups()) as MenuType[];
+    if (data.length > 0) {
+      setMenu(
+        data.map((group: MenuType) => ({ id: group.id, name: group.name }))
+      ); // Store both id and name
+    }
+    if (menuItemId == null) {
+      setSelectedItemId(data?.[0]?.id);
+      let accounts = await getAllAccount(data?.[0]?.id);
+      setAccounts(accounts);
+    }
+  };
+
   useEffect(() => {
     if (adjustedMenu) {
       let newAdjustedMenu = JSON.parse(adjustedMenu as string);
       setMenu(newAdjustedMenu);
       Promise.all(
-        newAdjustedMenu.map(
-          (item: MenuType, index: number) => {
-            return updateGroup(item.id, item.name, index); // Update the sort_order based on the index
-          }
-        )
+        newAdjustedMenu.map((item: MenuType, index: number) => {
+          return updateGroup(item.id, item.name, index); // Update the sort_order based on the index
+        })
       );
     }
   }, [adjustedMenu]);
 
-  const initData = async () => {
-    await initializeDatabase();
-    const data = (await getAllGroups()) as MenuType[];
-    if (data.length > 0) {
-      setMenu(data.map((group: MenuType) => ({ id: group.id, name: group.name }))); // Store both id and name
+  useEffect(() => {
+    if (menuItemId == null) {
+      return;
     }
-    setSelectedItemId(data?.[0]?.id);
-  };
+    getAllAccount(Number(menuItemId)).then((accounts) => {
+      setAccounts(accounts);
+    });
+    setSelectedItemId(Number(menuItemId));
+  }, [menuItemId]);
 
   const handleEditMenuItem = (item: string, index: number) => {
     editGroupDialogRef.current?.showDialog(item, index);
@@ -141,7 +172,7 @@ export default function HomeScreen() {
     setMenu(newMenu);
   };
 
-  const handleDeleteGroup = (item: string, index: number) => {
+  const handleDeleteMenuItem = (item: string, index: number) => {
     deleteGroupDialogRef.current?.showDialog(item, index);
   };
 
@@ -163,8 +194,28 @@ export default function HomeScreen() {
   const AddAccount = () => {
     router.navigate({
       pathname: "/home/AddAccount",
-      params: { menu: JSON.stringify(menu) },
+      params: { menuItemId: selectedItemId },
     });
+  };
+
+  const renderAccountItem = ({ item }: { item: Account }) => {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 10,
+          flexDirection: "row",
+          alignItems: "center",
+          height: 40,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: Colors[colorScheme ?? "light"].borderColor,
+        }}
+      >
+        <Text style={{ width: 100 }} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text numberOfLines={1}>{item.username}</Text>
+      </View>
+    );
   };
 
   return (
@@ -212,12 +263,17 @@ export default function HomeScreen() {
             ListFooterComponent={renderMenuFooter}
           />
         </View>
+        <FlatList
+          data={accounts}
+          renderItem={renderAccountItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
       </View>
       <AddGroupDialog ref={addGroupDialogRef} callback={addGroupItem} />
       <EditGroupDialog
         ref={editGroupDialogRef}
         handleRenameCallback={editGroupItem}
-        handleDeleteCallback={handleDeleteGroup}
+        handleDeleteCallback={handleDeleteMenuItem}
         handleSortCallback={handleSortGroup}
       />
       <RenameGroupDialog

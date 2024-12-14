@@ -34,16 +34,21 @@ export async function initializeDatabase() {
     );
   `);
 
-  // Check if the sort_order column exists, if not, add it
-  try {
-    await db.execAsync("ALTER TABLE groups ADD COLUMN sort_order INTEGER DEFAULT 0");
-  } catch (error) {
-    console.log("Column sort_order may already exist, or another error occurred:", error);
-  }
-
   // Check if the groups table is empty and insert default groups
   const allGroups = await db.getAllAsync("SELECT * FROM groups");
+
   if (allGroups.length === 0) {
+    // Check if the sort_order column exists, if not, add it
+    try {
+      await db.execAsync(
+        "ALTER TABLE groups ADD COLUMN sort_order INTEGER DEFAULT 0"
+      );
+    } catch (error) {
+      console.log(
+        "Column sort_order may already exist, or another error occurred:",
+        error
+      );
+    }
     const defaultGroups = ["默认", "工作", "游戏"];
     for (let index = 0; index < defaultGroups.length; index++) {
       await db.runAsync(
@@ -112,3 +117,75 @@ export async function getAllGroups() {
     return []; // Return an empty array in case of error
   }
 }
+
+// Define the Account interface with username and password
+interface Account {
+  id: number;
+  name: string;
+  username: string; // User's username
+  password: string; // User's password
+  group_id: number; // Keep the group_id for association with groups
+}
+
+// Function to add a new account with group_id
+export const addAccount = async (
+  name: string,
+  username: string,
+  password: string,
+  group_id: number
+): Promise<void> => {
+  try {
+    const db = await SQLite.openDatabaseAsync("password-manager.db");
+    await db.runAsync(
+      "INSERT INTO accounts (name, username, password, group_id) VALUES (?, ?, ?, ?)",
+      name,
+      username,
+      password,
+      group_id
+    );
+  } catch (error) {
+    console.error("Error adding account:", error);
+  }
+};
+
+// Function to update an existing account with group_id
+export const updateAccount = async (account: Account): Promise<void> => {
+  try {
+    const db = await SQLite.openDatabaseAsync("password-manager.db");
+    await db.runAsync(
+      "UPDATE accounts SET name = ?, username = ?, password = ?, group_id = ? WHERE id = ?",
+      account.name,
+      account.username,
+      account.password,
+      account.group_id,
+      account.id!
+    );
+  } catch (error) {
+    console.error("Error updating account:", error);
+  }
+};
+
+// Function to get an account by ID
+export const getAllAccount = async (group_id: number): Promise<Account[] | null> => {
+  try {
+    const db = await SQLite.openDatabaseAsync("password-manager.db");
+    const account = await db.getAllAsync<Account>(
+      "SELECT * FROM accounts WHERE group_id = ?",
+      group_id
+    );
+    return account || null; // Return null if no account found
+  } catch (error) {
+    console.error("Error getting account:", error);
+    return null;
+  }
+};
+
+// Function to delete an account by ID
+export const deleteAccount = async (id: number): Promise<void> => {
+  try {
+    const db = await SQLite.openDatabaseAsync("password-manager.db");
+    await db.runAsync("DELETE FROM accounts WHERE id = ?", id);
+  } catch (error) {
+    console.error("Error deleting account:", error);
+  }
+};

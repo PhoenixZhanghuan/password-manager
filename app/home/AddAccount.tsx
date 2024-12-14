@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import {
   StyleSheet,
   View,
-  Text,
-  TouchableOpacity,
   useColorScheme,
 } from "react-native";
 import { TextInput } from "react-native-paper";
 import { router, useLocalSearchParams } from "expo-router";
-import { Appbar, IconButton } from "react-native-paper";
+import { Appbar } from "react-native-paper";
 import { Colors } from "@/constants/Colors";
+import { addAccount } from "@/utils/sqlite";
 
 export default function GroupSortScreen() {
   const colorScheme = useColorScheme();
@@ -23,10 +22,35 @@ export default function GroupSortScreen() {
     router.back();
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (accountName === "" || accountNumber === "" || accountPassword === "") {
+      alert("请填写完整信息");
+      return;
+    }
+    console.log(
+      "accountName>>>",
+      accountName,
+      "accountNumber>>>",
+      accountNumber,
+      "accountPassword>>>",
+      accountPassword,
+      "menuItemId>>>",
+      params.menuItemId
+    );
+    await addAccount(
+      accountName,
+      accountNumber,
+      accountPassword,
+      parseInt(params.menuItemId as string)
+    );
     router.navigate({
       pathname: "/(tabs)",
+      params: { menuItemId: params.menuItemId },
     });
+
+    setAccountName("");
+    setAccountNumber("");
+    setAccountPassword("");
   };
 
   return (
@@ -57,7 +81,9 @@ export default function GroupSortScreen() {
           value={accountName}
           onChangeText={setAccountName}
           placeholder="请输入内容..."
-          right={<TextInput.Icon icon="delete" onPress={() => setAccountName("")}/>}
+          right={
+            <TextInput.Icon icon="delete" onPress={() => setAccountName("")} />
+          }
         />
         <TextInput
           mode="outlined"
@@ -65,7 +91,12 @@ export default function GroupSortScreen() {
           value={accountNumber}
           onChangeText={setAccountNumber}
           placeholder="请输入内容..."
-          right={<TextInput.Icon icon="delete" onPress={() => setAccountNumber("")}/>}
+          right={
+            <TextInput.Icon
+              icon="delete"
+              onPress={() => setAccountNumber("")}
+            />
+          }
         />
         <TextInput
           mode="outlined"
@@ -73,26 +104,16 @@ export default function GroupSortScreen() {
           value={accountPassword}
           onChangeText={setAccountPassword}
           placeholder="请输入内容..."
-          right={<TextInput.Icon icon="delete" onPress={() => setAccountPassword("")}/>}
+          right={
+            <TextInput.Icon
+              icon="delete"
+              onPress={() => setAccountPassword("")}
+            />
+          }
         />
       </View>
     </>
   );
 }
 
-const styles = StyleSheet.create({
-  item: {
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
-    flexDirection: "row",
-  },
-  text: {
-    fontSize: 16,
-    color: Colors.light.text,
-  },
-});
+const styles = StyleSheet.create({});
