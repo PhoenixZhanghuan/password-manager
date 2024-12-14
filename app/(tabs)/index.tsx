@@ -5,6 +5,7 @@ import {
   FlatList,
   useColorScheme,
   Text,
+  TouchableOpacity,
 } from "react-native";
 import { Appbar, Button, IconButton } from "react-native-paper";
 import React, { useEffect, useState } from "react";
@@ -29,14 +30,18 @@ import {
   updateGroup,
   getAllGroups,
   getAllAccount,
+  addAccount,
+  deleteAccount,
+  updateAccount,
 } from "@/utils/sqlite";
+import AccountMenuDialog, { AccountMenuDialogRefProps } from "@/components/AccountMenuDialog";
 
 // 定义样式类型
 type StyleParams = "light" | "dark";
 
 type MenuType = { id: number; name: string };
 
-type Account = {
+export type Account = {
   id: number;
   name: string;
   username: string;
@@ -56,6 +61,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const [selectedItemId, setSelectedItemId] = useState<number | null>(0);
   const [accounts, setAccounts] = useState<Account[] | null>([]);
+
+  const accountMenuDialogRef = React.useRef<AccountMenuDialogRefProps>(null);
 
   const renderMenuItem = ({
     item,
@@ -198,9 +205,31 @@ export default function HomeScreen() {
     });
   };
 
+  const handleTopAccount = () => {
+   
+  };
+
+  const handleEditAccount = () => {
+    
+  };
+
+  const handleCopyAccount = () => {
+    
+  };
+
+  const handleDeleteAccount = async (item: Account) => {
+    await deleteAccount(item.id);
+    getAllAccount(Number(item.group_id)).then((accounts) => {
+      setAccounts(accounts);
+    });
+  };
+
   const renderAccountItem = ({ item }: { item: Account }) => {
     return (
-      <View
+      <TouchableOpacity
+        onLongPress={() => {
+          accountMenuDialogRef.current?.showDialog(item);
+        }}
         style={{
           paddingHorizontal: 10,
           flexDirection: "row",
@@ -214,7 +243,7 @@ export default function HomeScreen() {
           {item.name}
         </Text>
         <Text numberOfLines={1}>{item.username}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -283,6 +312,13 @@ export default function HomeScreen() {
       <DeleteGroupDialog
         ref={deleteGroupDialogRef}
         callback={deleteGroupItem}
+      />
+      <AccountMenuDialog
+        ref={accountMenuDialogRef}
+        topAccount={handleTopAccount}
+        editAccount={handleEditAccount}
+        copyAccount={handleCopyAccount}
+        deleteAccount={handleDeleteAccount}
       />
     </View>
   );
